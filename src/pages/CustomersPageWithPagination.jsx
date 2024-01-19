@@ -7,27 +7,27 @@ const CustomersPageWithPagination = (props) => {
     const [ customers, setCustomers] = useState([])
 
     // pour la pagination 
-    const [currentPage, setCurrentPage] = useState(1)
-    const [totalItems, setTotalItems] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1) // attribue la currentpage qui sera de 1
+    const [totalItems, setTotalItems] = useState(0) //récupère le nombre total de pages
     // définir le nombre d'items par page 
     const itemsPerPage= 10
 
     const handlePageChange = (page) => {
-        setCustomers([])
-        setCurrentPage(page)
+        setCustomers([]) //au changement de page on vient réinitialiser le tableau
+        setCurrentPage(page) //en lui attribuant la bonne page
     }
 
     useEffect(()=>{
         Axios.get(`http://apicourse.myepse.be/api/customers?pagination=true&count=${itemsPerPage}&page=${currentPage}`)
         .then(response => {
             setCustomers(response.data['hydra:member'])
-            setTotalItems(response.data['hydra:totalItems'])
+            setTotalItems(response.data['hydra:totalItems']) //on récupère total items dans l'api
         })
     },[currentPage])
 
     const handleDelete=(id)=>{
         //pessimiste
-        const originalCustomers=[...customers]
+        const originalCustomers=[...customers] //copie du tableau
         
         
         //optimiste
@@ -89,6 +89,7 @@ const CustomersPageWithPagination = (props) => {
                     
                 </tbody>
             </table>
+            {/* on appelle le composant pagination et on lui passe les props nécessaires voir plus haut*/}
             <Pagination 
                 currentPage={currentPage}
                 itemsPerPage={itemsPerPage}
