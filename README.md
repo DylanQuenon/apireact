@@ -1,3 +1,4 @@
+# # git commit 1dfaba6
 # Faire le routeur:
 
 - faire le components de la nav avec les link
@@ -6,12 +7,13 @@
 
 # Faire la homePage dans un dossier page (installer thème boostwatch)
 
+# # git commit 19e92f1
 # Faire la customersPage 
 
-/!\ attention à remplacer les a par les Link de react
+/!\ attention à remplacer les a par les Link de react,
 
-- Axios va servir à récupérer les datas de l'api
-- Pour récupérer avec axios, dans le useEffect (déclenche l'appel de l'api) tandis que useState stocke les données
+- Axios va servir à récupérer les datas de l'api,
+- pour récupérer avec axios, dans le useEffect (déclenche l'appel de l'api) tandis que useState stocke les données,
 
     ```js
     const [customers, setCustomers] = useState([])
@@ -26,10 +28,10 @@
     
     // stocke dans customers les données qu'on récupère puis faire map de customers et y placer les données
     ```
-
+# # git commit 325a7d4
 # Faire la customerspagewithpagination
 
-- faire un component pagination
-- voir fichier pour explication
-- la page customerwithpagination (voir fichier pour les modifs)
+- faire un component pagination,
+- voir fichier pour explication,
+- la page customerwithpagination (voir fichier pour les modifs).
 
