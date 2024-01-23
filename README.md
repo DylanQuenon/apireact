@@ -97,3 +97,8 @@
 -met a jour la nav et le routeur
 - le composant avec findall delete
 
+PAREIL QUE CUSTOMERS
+
+# TRANSFORMER TOKEN 
+
+dans le service authapi.js
