@@ -91,3 +91,9 @@
 - changer customers avec filtered customers à l'évènement pour laisser que les résultats correspondants
 - pas oublier l'input
 
+
+# INVOICES
+
+-met a jour la nav et le routeur
+- le composant avec findall delete
+
