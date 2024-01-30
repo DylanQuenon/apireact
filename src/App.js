@@ -7,6 +7,7 @@ import InvoicesPage from "./pages/InvoicesPage";
 import LoginPage from "./pages/LoginPage";
 import authAPI from "./services/authAPI";
 import { useState } from "react";
+import PrivateRoute from "./components/PrivateRoute";
 
 
 
@@ -19,9 +20,16 @@ const App = () => {
       <main className="container pt-5">
         <Routes>
           <Route path="/login" element={<LoginPage onLogin={setIsAuthenticated} />}  />
-          <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/invoices" element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <InvoicesPage />
+            </PrivateRoute>
+          } />
           <Route path="/customerpage" element={<CustomersPageWithPagination />} />
-          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/customers" element={  
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <CustomersPage />
+            </PrivateRoute>} />
           <Route path="/" element={<HomePage />} />
         </Routes>
       </main>
