@@ -1,37 +1,44 @@
 import { useState, useEffect } from "react";
 import Pagination from "../components/Pagination";
 import customersAPI from "../services/customersAPI";
+import { Link } from "react-router-dom";
+import {toast} from 'react-toastify'
+import TableLoader from "../components/loaders/TableLoader";
 
 const CustomersPage = (props) => {
     const [customers, setCustomers] = useState([])
 
-    //filtre
-    const [search,setSearch]=useState("")
+    // filtre
+    const [search, setSearch] = useState("")
+
+    //loader
+    const [loading, setLoading] = useState(true)
 
     const fetchCustomers = async () => {
         try{
             const data = await customersAPI.findAll()
             setCustomers(data)
+            setLoading(false) // j'ai fini de charger les données
         }catch(error)
         {
             // notif à faire
-            console.error(error.response)
+            toast.error("Impossible de charger les clients")
+            //console.error(error.response)
         }
     }
 
-    //Pour les filtres
-    const handleSearch=  event=>{
-        const value=event.currentTarget.value
+    // pour les filtres
+    const handleSearch = event => {
+        const value = event.currentTarget.value 
         setSearch(value)
         setCurrentPage(1)
+    } 
 
-    }
-
-    const filteredCustomers=customers.filter(c=>
-        c.firstName.toLowerCase().includes(search.toLowerCase()) || 
-        c.lastName.toLowerCase().includes(search.toLowerCase()) ||  
-        c.email.toLowerCase().includes(search.toLowerCase()) || 
-        (c.company && c.company.toLowerCase().includes(search.toLowerCase()))
+    const filteredCustomers = customers.filter(c => 
+            c.firstName.toLowerCase().includes(search.toLowerCase()) ||
+            c.lastName.toLowerCase().includes(search.toLowerCase()) ||
+            c.email.toLowerCase().includes(search.toLowerCase) || 
+            (c.company && c.company.toLowerCase().includes(search.toLowerCase()))
         )
 
     // pour la pagination 
@@ -39,7 +46,7 @@ const CustomersPage = (props) => {
 
     useEffect(()=>{
         fetchCustomers()
-    },[customers])
+    },[])
 
     // pour la pagination 
     const handlePageChange = (page) => {
@@ -50,59 +57,88 @@ const CustomersPage = (props) => {
 
     const paginatedCustomers = Pagination.getData(filteredCustomers, currentPage, itemsPerPage)
 
+    const handleDelete = async (id) => {
+        // pessimiste 
+        const originalCustomers = [...customers]
+
+        // optimiste
+        setCustomers(customers.filter(customer => customer.id !==id))
+
+        try{
+            await customersAPI.delete(id)
+            toast.warning("Le client "+id+" a bien été supprimé")
+        }catch(error)
+        {
+            setCustomers(originalCustomers)
+            // notif 
+            toast.error("La suppression du client n'a pas pu fonctionner")
+        }
+    }
+
     return ( 
         <>
-            <h1>Liste des clients</h1>
-            <div className="form-group">
-                <input type="text" className="form-control"placeholder="Recherche..." onChange={handleSearch} value={search}/>
+            <div className="d-flex justify-content-between align-items-center">
+                <h1>Liste des clients</h1>
+                <Link to="/customers/new" className="btn btn-primary mb-3">Créer un client</Link>
             </div>
-            <table className="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Client</th>
-                        <th>Email</th>
-                        <th>Entreprise</th>
-                        <th>Factures</th>
-                        <th className="text-center">Montant total</th>
-                        <th className="text-center">Montant Restant</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {paginatedCustomers.map(customer => (
-                        <tr key={customer.id}>
-                            <td>{customer.id}</td>
-                            <td>{customer.firstName} {customer.lastName}</td>
-                            <td>{customer.email}</td>
-                            <td>{customer.company}</td>
-                            <td class="text-center">
-                                <span className="badge">
-                                    {customer.invoices.length}
-                                </span>
-                            </td>
-                            <td className="text-center">
-                                {customer.totalAmount.toLocaleString()}€
-                            </td>
-                            <td className="text-center">
-                                {customer.unpaidAmount.toLocaleString()}€
-                            </td>
-                            <td>
-                                <button className="btn btn-sm btn-danger">Supprimer</button>
-                            </td>
+            <div className="form-group">
+                <input type="text" className="form-control" placeholder="Recherche..." onChange={handleSearch} value={search} />
+            </div>
+            { (!loading) ? (
+                <table className="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Client</th>
+                            <th>Email</th>
+                            <th>Entreprise</th>
+                            <th>Factures</th>
+                            <th className="text-center">Montant total</th>
+                            <th className="text-center">Montant Restant</th>
+                            <th></th>
                         </tr>
-                    ))}
-                    
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {paginatedCustomers.map(customer => (
+                            <tr key={customer.id}>
+                                <td>{customer.id}</td>
+                                <td>{customer.firstName} {customer.lastName}</td>
+                                <td>{customer.email}</td>
+                                <td>{customer.company}</td>
+                                <td className="text-center">
+                                    <span className="badge bg-secondary">
+                                        {customer.invoices.length}
+                                    </span>
+                                </td>
+                                <td className="text-center">
+                                    {customer.totalAmount.toLocaleString()}€
+                                </td>
+                                <td className="text-center">
+                                    {customer.unpaidAmount.toLocaleString()}€
+                                </td>
+                                <td>
+                                    <Link className="btn btn-sm btn-warning m-1" to={`/customers/${customer.id}`}>Editer</Link>
+                                    <button 
+                                        className="btn btn-sm btn-danger m-1"
+                                        disabled={customer.invoices.length > 0} 
+                                        onClick={() => handleDelete(customer.id)}>Supprimer</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <TableLoader />
+            )}
+            
             {
-                itemsPerPage < filteredCustomers.length &&
-            <Pagination 
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                length={customers.length}
-                onPageChanged={handlePageChange}
-            />
+                itemsPerPage < filteredCustomers.length && 
+                <Pagination 
+                    currentPage={currentPage}
+                    itemsPerPage={itemsPerPage}
+                    length={customers.length}
+                    onPageChanged={handlePageChange}
+                />
             }
         </>
      );

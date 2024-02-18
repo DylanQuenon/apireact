@@ -1,9 +1,14 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom';
 import authAPI from '../services/authAPI';
+import AuthContext from '../contexts/AuthContext';
+import Field from '../components/forms/Field';
+import { toast } from 'react-toastify'
 
 const LoginPage = (props) => {
-    const navigate=useNavigate()
+
+    const navigate = useNavigate()
+    const {setIsAuthenticated} = useContext(AuthContext)
 
     const [credentials, setCredentials] = useState({
         username: "",
@@ -26,11 +31,12 @@ const LoginPage = (props) => {
         try{
             await authAPI.authenticate(credentials)
             setError("")
-            props.onLogin(true)
-            navigate("/customers", { replace: true })
+            setIsAuthenticated(true)
+            toast.success("Vous êtes connecté")
+            navigate("/customers", {replace: true})
         }catch(error)
         {
-            setError("Aucun compte ne possède cette adresse e-mail ou les informations ne correspondent pas")
+            setError("Aucun compte ne possède cette adresse e-mail ou les information ne corresponde pas")
         }
     }
 
@@ -40,33 +46,24 @@ const LoginPage = (props) => {
                 <div className="col-4 offset-4">
                     <h1>Connexion</h1>
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group my-3">
-                            <label htmlFor="username">Adresse E-mail</label>
-                            <input 
-                                type="email"
-                                value={credentials.username}
-                                onChange={handleChange}
-                                placeholder='Adresse E-mail de connexion'
-                                id="username"
-                                name="username"
-                                className={"form-control " + (error && "is-invalid")}
-                            />
-                            { error && (
-                                <p className='invalid-feedback'>{error}</p>
-                            )} 
-                        </div>
-                        <div className="form-group my-3">
-                            <label htmlFor="password">Mot de passe</label>
-                            <input 
-                                type="password" 
-                                value={credentials.password}
-                                onChange={handleChange}
-                                placeholder='Mot de passe'
-                                id="password"
-                                name="password"
-                                className='form-control'    
-                            />
-                        </div>
+                        <Field 
+                            label="Adresse E-mail"
+                            name="username"
+                            value={credentials.username}
+                            onChange={handleChange}
+                            placeholder='Adresse E-mail de connexion'
+                            error={error}
+                        />
+
+                        <Field 
+                            label="Mot de passe"
+                            name="password"
+                            value={credentials.password}
+                            placeholder='Mot de passe'
+                            onChange={handleChange}
+                            error={error}
+                            type="password"
+                        />
                         <div className="form-group my-3">
                             <button className="btn btn-success">Connexion</button>
                         </div>
